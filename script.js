@@ -46,6 +46,41 @@ function getFeedbackData() {
      
 }
 
+function getFeedbackData() {
+    var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Feedback");
+    
+    if (!sheet) {
+        Logger.log("❌ ERROR: 'Feedback' sheet not found!");
+        return { error: "Sheet not found" };
+    }
+
+    var data = sheet.getDataRange().getValues();
+
+    if (!data || data.length <= 1) { 
+        Logger.log("⚠️ No feedback data found.");
+        return { feedback: [] }; 
+    }
+
+    var feedbackList = [];
+    for (var i = 1; i < data.length; i++) {
+        feedbackList.push({
+            UIN: data[i][0] || "N/A",
+            Timestamp: data[i][1] || "N/A",
+            Name: data[i][2] || "N/A",
+            Mobile: data[i][3] || "N/A",
+            Feedback: data[i][4] || "N/A",
+            Email: data[i][5] || "N/A",
+            Status: data[i][6] || "N/A",
+            AssignedTo: data[i][7] || "N/A",
+            Resolution: data[i][8] || "N/A"
+        });
+    }
+
+    Logger.log("✅ Returning Feedback Data: " + JSON.stringify(feedbackList));
+    
+    // FIXED: Return the correct key
+    return { feedback: feedbackList };
+}
 
 
 
