@@ -21,7 +21,7 @@ function loadFeedback() {
                 return;
             }
 
-            console.log("📌 Feedback List:", response.feedback); // Debugging line
+            console.log("📌 Feedback List:", response.feedback); 
             displayFeedback(response.feedback);
         })
         .withFailureHandler(function(error) {
@@ -30,7 +30,6 @@ function loadFeedback() {
         })
         .getFeedbackData();
 }
-
 // 
 
 
@@ -42,13 +41,15 @@ function displayFeedback(feedbackList) {
 
     console.log("✅ Rendering Feedback Data:", feedbackList);
 
-    // Check if feedback exists
+    // Show JSON response for debugging
+    jsonOutput.textContent = JSON.stringify(feedbackList, null, 4);
+
     if (!feedbackList || feedbackList.length === 0) {
         tableBody.innerHTML = "<tr><td colspan='9'>No feedback available.</td></tr>";
         return;
     }
 
-    tableBody.innerHTML = ""; // Clear existing rows
+    tableBody.innerHTML = ""; 
 
     feedbackList.forEach((item) => {
         let row = document.createElement("tr");
@@ -196,6 +197,8 @@ function displayFeedback(feedbackList) {
             <!-- Data will be inserted here -->
         </tbody>
     </table>
+ <h3>JSON Response Debug</h3>
+    <pre id="jsonOutput" style="background: #f4f4f4; padding: 10px; border: 1px solid #ddd;"></pre>
 
 </body>
 </html>
