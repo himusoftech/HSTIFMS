@@ -13,13 +13,13 @@ function getFeedbackData() {
 
     var data = sheet.getDataRange().getValues();
 
-    if (!data || data.length <= 1) { // Check if there's data (excluding headers)
+    if (!data || data.length <= 1) { 
         Logger.log("⚠️ No feedback data found.");
-        return { feedback: [] }; // Return empty array instead of null
+        return { feedback: [] }; 
     }
 
     var feedbackList = [];
-    for (var i = 1; i < data.length; i++) { // Skip headers
+    for (var i = 1; i < data.length; i++) {
         feedbackList.push({
             UIN: data[i][0] || "N/A",
             Timestamp: data[i][1] || "N/A",
@@ -32,6 +32,11 @@ function getFeedbackData() {
             Resolution: data[i][8] || "N/A"
         });
     }
+
+    Logger.log("✅ Returning Feedback Data: " + JSON.stringify({ feedback: feedbackList }));
+    return { feedback: feedbackList }; // FIXED: Correct key structure
+}
+
 
     Logger.log("✅ Returning Feedback Data: " + JSON.stringify(feedbackList));  
     return { 
