@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feedback Management System</title>
+    <script>
+
+
+function loadFeedback() {
+    console.log("🔄 Fetching feedback...");
+
+    google.script.run
+        .withSuccessHandler(function(response) {
+            console.log("✅ Full Response Received:", response);
+            
+            if (!response || !response.feedback || response.feedback.length === 0) {
+                console.warn("⚠️ No feedback available.");
+                document.getElementById("feedbackTableBody").innerHTML = 
+                    "<tr><td colspan='10'>No feedback available.</td></tr>";
+                return;
+            }
+
+            console.log("📌 Feedback List:", response.feedback); // Debugging line
+            displayFeedback(response.feedback);
+        })
+        .withFailureHandler(function(error) {
+            console.error("❌ Error fetching feedback:", error);
+            alert("Error fetching feedback. Please try again.");
+        })
+        .getFeedbackData();
+}
+
+// 
+
+
+
+
+function displayFeedback(feedbackList) {
+    let tableBody = document.querySelector("#feedbackTableBody");
+    let jsonOutput = document.querySelector("#jsonOutput");
+
+    console.log("✅ Rendering Feedback Data:", feedbackList);
+
+    // Check if feedback exists
+    if (!feedbackList || feedbackList.length === 0) {
+        tableBody.innerHTML = "<tr><td colspan='9'>No feedback available.</td></tr>";
+        return;
+    }
+
+    tableBody.innerHTML = ""; // Clear existing rows
+
+    feedbackList.forEach((item) => {
+        let row = document.createElement("tr");
+        row.innerHTML = `
+            <td>${item.UIN || "N/A"}</td>
+            <td>${item.Timestamp || "N/A"}</td>
+            <td>${item.Name || "N/A"}</td>
+            <td>${item.Mobile || "N/A"}</td>
+            <td>${item.Feedback || "N/A"}</td>
+            <td>${item.Email || "N/A"}</td>
+            <td>${item.Status || "N/A"}</td>
+            <td>${item.AssignedTo || "N/A"}</td>
+            <td>${item.Resolution || "N/A"}</td>
+            <td>
+                <button onclick="assignFeedback('${item.UIN}')">Assign</button>
+            </td>
+        `;
+        tableBody.appendChild(row);
+    });
+}
+
+
+// Function to fetch and display feedback
+// function displayFeedback(feedbackList) {
+//     let tableBody = document.querySelector("#feedbackTable tbody");
+//     let jsonOutput = document.querySelector("#jsonOutput");
+
+//     // Call the Apps Script function asynchronously
+//     google.script.run.withSuccessHandler(function(response) {
+//         console.log("✅ Fetched Feedback Data:", response);
+
+//         // Show JSON response in the <pre> tag (for debugging)
+//         jsonOutput.textContent = JSON.stringify(response, null, 4);
+
+//         // Check if feedback exists
+//         if (!response || !response.feedback || response.feedback.length === 0) {
+//             tableBody.innerHTML = "<tr><td colspan='9'>No feedback available.</td></tr>";
+//             return;
+//         }
+
+//         tableBody.innerHTML = ""; // Clear existing rows
+
+//         response.feedback.forEach((item) => {
+//             let row = document.createElement("tr");
+//             row.innerHTML = `
+//                 <td>${item.UIN || "N/A"}</td>
+//                 <td>${item.Timestamp || "N/A"}</td>
+//                 <td>${item.Name || "N/A"}</td>
+//                 <td>${item.Mobile || "N/A"}</td>
+//                 <td>${item.Feedback || "N/A"}</td>
+//                 <td>${item.Email || "N/A"}</td>
+//                 <td>${item.Status || "N/A"}</td>
+//                 <td>${item.AssignedTo || "N/A"}</td>
+//                 <td>${item.Resolution || "N/A"}</td>
+//                 <td>
+//                     <button onclick="assignFeedback('${item.UIN}')">Assign</button>
+//                 </td>
+//             `;
+//             tableBody.appendChild(row);
+//         });
+//     }).withFailureHandler(function(error) {
+//         console.error("❌ Error fetching data:", error);
+//         tableBody.innerHTML = "<tr><td colspan='9'>Error loading feedback.</td></tr>";
+//     }).getFeedbackData(); // Call the Apps Script function
+// }
+
+
+
+
+
+// <!-- 
+//         function displayFeedback(data) {
+//             let tableBody = document.getElementById("feedbackTableBody");
+//             tableBody.innerHTML = "";  // Clear existing data
+//             console.log("✅ Data received:", data);
+//             if (!data || data.length === 0) {
+//                 tableBody.innerHTML = "<tr><td colspan='10'>No feedback available.</td></tr>";
+//                 return;
+//             }
+
+//             data.forEach(row => {
+//                 let tr = document.createElement("tr");
+
+//                 tr.innerHTML = `
+//                     <td>${row.UIN || "N/A"}</td>
+//                     <td>${row.Timestamp || "N/A"}</td>
+//                     <td>${row.Name || "N/A"}</td>
+//                     <td>${row.Mobile || "N/A"}</td>
+//                     <td>${row.Feedback || "N/A"}</td>
+//                     <td>${row.Email || "N/A"}</td>
+//                     <td>${row.Status || "N/A"}</td>
+//                     <td>${row.AssignedTo || "N/A"}</td>
+//                     <td>${row.Resolution || "N/A"}</td>
+//                     <td>
+//                         <button onclick="assignFeedback('${row.UIN}')">Assign</button>
+//                     </td>
+//                 `;
+
+//                 tableBody.appendChild(tr);
+//             });
+//         } -->
+
+        function assignFeedback(refNum) {
+            let assignee = prompt("Enter Assignee Name:");
+            if (!assignee) return;
+
+            console.log(`🔄 Assigning ${refNum} to ${assignee}...`);
+
+            google.script.run
+                .withSuccessHandler(function(response) {
+                    console.log("✅ Assignment Successful:", response);
+                    alert(response);
+                    loadFeedback();  // Refresh table
+                })
+                .withFailureHandler(function(error) {
+                    console.error("❌ Error assigning feedback:", error);
+                    alert("Assignment failed!");
+                })
+                .assignFeedback(refNum, assignee);
+        }
+
+        window.onload = loadFeedback;
+    </script>
+</head>
+<body>
+
+    <h2>Feedback Management System</h2>
+
+    <table border="1">
+        <thead>
+            <tr>
+                <th>UIN</th>
+                <th>Timestamp</th>
+                <th>Name</th>
+                <th>Mobile</th>
+                <th>Feedback</th>
+                <th>Email</th>
+                <th>Status</th>
+                <th>Assigned To</th>
+                <th>Resolution</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody id="feedbackTableBody">
+            <!-- Data will be inserted here -->
+        </tbody>
+    </table>
+
+</body>
+</html>
