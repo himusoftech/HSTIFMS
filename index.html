@@ -6,6 +6,189 @@
     <title>Feedback Management System</title>
     <script>
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feedback Management System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #FFF9EE;
+            margin: 20px;
+            text-align: center;
+            color: #4A1A1A;
+        }
+        h2 {
+            color: #800000;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            overflow: hidden;
+            border: 2px solid #C0C0C0;
+        }
+        th, td {
+            padding: 12px;
+            text-align: center;
+            border-bottom: 1px solid #C0C0C0;
+            color: #4A1A1A;
+        }
+        th {
+            background: #FFD9B3;
+            color: #4A1A1A;
+            border: 2px solid #C0C0C0;
+            cursor: pointer;
+        }
+        tr:hover {
+            background: #FFF3DD;
+        }
+        input {
+            border: 1px solid #C0C0C0;
+            border-radius: 5px;
+            padding: 8px;
+            margin-bottom: 10px;
+            width: 250px;
+        }
+        button {
+            padding: 5px 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: 0.3s;
+            background-color: #800000;
+            color: white;
+            margin: 5px;
+        }
+        button:hover {
+            background: #600000;
+        }
+        button:disabled {
+            background: grey;
+            cursor: not-allowed;
+        }
+        select {
+            padding: 5px;
+            border: 1px solid #C0C0C0;
+            border-radius: 5px;
+            background: white;
+            color: #4A1A1A;
+        }
+        .status-filter {
+            margin-bottom: 10px;
+        }
+        .hidden {
+            display: none;
+        }
+        footer {
+            margin-top: 20px;
+            padding: 10px;
+            background: #FFD9B3;
+            color: #4A1A1A;
+            font-weight: bold;
+        }
+    </style>
+    <script>
+        function loadFeedback() {
+            google.script.run.withSuccessHandler(function(response) {
+                if (!response || !response.feedback || response.feedback.length === 0) {
+                    document.getElementById("feedbackTableBody").innerHTML = "<tr><td colspan='10'>No feedback available.</td></tr>";
+                    return;
+                }
+                displayFeedback(response.feedback);
+            }).getFeedbackData();
+        }
+
+        function displayFeedback(feedbackList) {
+            let tableBody = document.querySelector("#feedbackTableBody");
+            tableBody.innerHTML = "";
+
+            google.script.run.withSuccessHandler(function(assigneeList) {
+                feedbackList.forEach((item) => {
+                    let row = document.createElement("tr");
+                    let dropdown = `<select onchange="assignFeedback('${item.UIN}', this.value)">
+                                        <option value="">Select</option>
+                                        ${assigneeList.map(name => `<option value="${name}">${name}</option>`).join('')}
+                                    </select>`;
+                    
+                    let actionButton = "";
+                    if (item.Status === "Pending") {
+                        actionButton = dropdown;
+                    } else if (item.Status === "In Process") {
+                        actionButton = `<button onclick="resolveFeedback('${item.UIN}')">Resolve</button>`;
+                    } else if (item.Status === "Resolved") {
+                        actionButton = `<button disabled>Resolved</button>`;
+                    }
+                    
+                    row.innerHTML = `
+                        <td>${item.UIN || "N/A"}</td>
+                        <td>${item.Timestamp || "N/A"}</td>
+                        <td class="collapsible"> ${item.Mobile || "N/A"}</td>
+                        <td>${item.Feedback || "N/A"}</td>
+                        <td class="collapsible">${item.Email || "N/A"}</td>
+                        <td>${item.Status || "N/A"}</td>
+                        <td>${item.AssignedTo || dropdown}</td>
+                        <td class="collapsible">${item.Resolution || "N/A"}</td>
+                        <td>${actionButton}</td>
+                    `;
+                    row.dataset.status = item.Status;
+                    tableBody.appendChild(row);
+                });
+            }).getManagementList();
+        }
+
+        function assignFeedback(refNum, assignee) {
+            if (!assignee) return;
+            google.script.run.withSuccessHandler(function() {
+                loadFeedback();
+            }).assignFeedback(refNum, assignee);
+        }
+
+        function resolveFeedback(refNum) {
+            let resolution = prompt("Enter resolution:");
+            if (!resolution) return;
+            google.script.run.withSuccessHandler(function() {
+                loadFeedback();
+            }).postResolution(refNum, resolution);
+        }
+
+        window.onload = loadFeedback;
+    </script>
+</head>
+<body>
+    <h2>Feedback Management System</h2>
+    <input type="text" id="searchInput" onkeyup="filterFeedback()" placeholder="🔍 Search feedback...">
+    <div class="status-filter">
+        <button onclick="filterByStatus('Pending')">Pending</button>
+        <button onclick="filterByStatus('In Process')">In Process</button>
+        <button onclick="filterByStatus('Resolved')">Resolved</button>
+        <button onclick="filterByStatus('All')">All</button>
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th>UIN</th>
+                <th>Timestamp</th>
+                <th>Mobile</th>
+                <th>Feedback</th>
+                <th>Email</th>
+                <th>Status</th>
+                <th>Assigned To</th>
+                <th>Resolution</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody id="feedbackTableBody"></tbody>
+    </table>
+    <footer>
+        Powered by M/s Himu SofTech India Pvt Ltd | For Support Contact: support@himusoftech.com
+    </footer>
+</body>
+</html>
 
 function loadFeedback() {
     console.log("🔄 Fetching feedback...");
